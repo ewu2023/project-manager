@@ -36,9 +36,23 @@ class TaskBoard extends React.Component {
         });
 
         return (
-            <div class='board'>
-                {listElements}
+            <div id='board'>
+                <AddListForm />
+                <div class='list-view'>{listElements}</div>
             </div>
+        );
+    }
+}
+
+class AddListForm extends React.Component{
+    render() {
+        return (
+            <form class='center'>
+                <label>
+                    <input type='text' />
+                    <button>Add list</button>
+                </label>
+            </form>
         );
     }
 }
