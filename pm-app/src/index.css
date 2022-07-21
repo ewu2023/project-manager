@@ -1,0 +1,14 @@
+.card {
+    border: 1px solid black;
+    width: 25%;
+}
+
+.list {
+    border: 1px dashed black;
+    width: 50%;
+}
+
+.board {
+    display: flex;
+    flex-direction: row;
+}
