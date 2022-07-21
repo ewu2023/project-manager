@@ -11,8 +11,28 @@ class TaskCard extends React.Component {
 }
 
 class TaskList extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            tasks: this.props.tasks
+        };
+    }
+
+    addTask(taskName) {
+        if (taskName === '') {
+            return;
+        }
+
+        const tasks = this.state.tasks;
+        const newTask = {name: taskName};
+
+        this.setState({
+            tasks: tasks.concat([newTask])
+        });
+    }
+
     render() {
-        const tasks = this.props.tasks;
+        const tasks = this.state.tasks;
         const cardElements = tasks.map((task, i) => {
             return (
                 <TaskCard taskName={task.name} key={task.name} index={i} />
@@ -23,6 +43,10 @@ class TaskList extends React.Component {
             <ul className='list'>
                 <h3>{this.props.listName}</h3>
                 {cardElements}
+                <br />
+                <li key={this.props.listName + '-add'}> 
+                  <AddForm add={(taskName) => this.addTask(taskName)} form_name='Add Task' /> 
+                </li>
             </ul>
         );
     }
@@ -42,7 +66,7 @@ class TaskBoard extends React.Component {
         if (list_name === '') {
             return
         }
-        
+
         const curLists = this.state.lists.slice();
         const newList = {
             taskName: list_name,
@@ -62,14 +86,14 @@ class TaskBoard extends React.Component {
 
         return (
             <div id='board'>
-                <AddListForm addList={(list_name) => this.addList(list_name)}/>
+                <AddForm add={(list_name) => this.addList(list_name)} form_name={'Add List'}/>
                 <div className='list-view'>{listElements}</div>
             </div>
         );
     }
 }
 
-class AddListForm extends React.Component{
+class AddForm extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
@@ -91,7 +115,7 @@ class AddListForm extends React.Component{
         const list_name = this.state.value;
 
         // Create new list 
-        this.props.addList(list_name);
+        this.props.add(list_name);
 
         // Reset text box
         this.setState({
@@ -104,7 +128,7 @@ class AddListForm extends React.Component{
             <form className='center' onSubmit={(event) => this.handleSubmit(event)}>
                 <label>
                     <input type='text' onChange={(event) => this.handleChange(event)} value={this.state.value} />
-                    <button>Add list</button>
+                    <button>{this.props.form_name}</button>
                 </label>
             </form>
         );
