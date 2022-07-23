@@ -3,39 +3,39 @@ import ReactDOM from 'react-dom/client';
 import './index.css'
 
 class TaskCard extends React.Component {
+    handleClick(event) {
+        event.preventDefault();
+        this.props.printElement(this.props.parentIndex, this.props.index);
+    }
+
     render() {
+        console.log(this.props.taskName);
         return (
-            <li key={this.props.index} className='card'>{this.props.taskName}</li>
+            <li key={this.props.index} className='card' onClick={(event) => this.handleClick(event)}>{this.props.taskName}</li>
         );
     }
 }
 
 class TaskList extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            tasks: this.props.tasks
-        };
-    }
-
     addTask(taskName) {
         if (taskName === '') {
             return;
         }
-
-        const tasks = this.state.tasks;
-        const newTask = {name: taskName};
-
-        this.setState({
-            tasks: tasks.concat([newTask])
-        });
+        
+        this.props.addTask(this.props.index, taskName);
     }
 
     render() {
-        const tasks = this.state.tasks;
+        const tasks = this.props.tasks;
         const cardElements = tasks.map((task, i) => {
             return (
-                <TaskCard taskName={task.name} key={task.name} index={i} />
+                <TaskCard 
+                  taskName={task.name} 
+                  key={task.name} 
+                  index={i} 
+                  parentIndex = {this.props.index}
+                  printElement={this.props.printElement}
+                />
             );
         });
 
@@ -62,14 +62,14 @@ class TaskBoard extends React.Component {
         };
     }
 
-    addList(list_name) {
-        if (list_name === '') {
+    addList(listName) {
+        if (listName === '') {
             return
         }
 
         const curLists = this.state.lists.slice();
         const newList = {
-            taskName: list_name,
+            listName: listName,
             tasks: []
         };
 
@@ -78,15 +78,42 @@ class TaskBoard extends React.Component {
         });
     }
 
+    addTask(listIndex, taskName) {
+        // Retrieve list to append task to
+        let allLists = this.state.lists.slice();
+        const targetList = allLists[listIndex];
+        const tasks = targetList['tasks'].slice();
+
+        // Append the new task to the list
+        const newTask = {name: taskName};
+        tasks.push(newTask);
+
+        // Update the target list
+        allLists[listIndex] = {
+            listName: targetList.listName,
+            tasks: tasks
+        };
+
+        this.setState({
+            lists: allLists
+        });
+    }
+
     render() {
         const taskLists = this.state.lists;
-        const listElements = taskLists.map((taskList) => {
-            return <TaskList tasks={taskList.tasks} listName={taskList.taskName} key={taskList.taskName} />
+        const listElements = taskLists.map((taskList, i) => {
+            return <TaskList 
+              tasks={taskList.tasks} 
+              listName={taskList.listName}
+              addTask={(listIndex, taskName) => this.addTask(listIndex, taskName)}
+              key={taskList.listName} 
+              index={i}
+            />
         });
 
         return (
             <div id='board'>
-                <AddForm add={(list_name) => this.addList(list_name)} form_name={'Add List'}/>
+                <AddForm add={(listName) => this.addList(listName)} form_name={'Add List'}/>
                 <div className='list-view'>{listElements}</div>
             </div>
         );
@@ -112,10 +139,10 @@ class AddForm extends React.Component{
         event.preventDefault();
         
         // Retrieve list name from text box
-        const list_name = this.state.value;
+        const listName = this.state.value;
 
         // Create new list 
-        this.props.add(list_name);
+        this.props.add(listName);
 
         // Reset text box
         this.setState({
